@@ -26,7 +26,7 @@ Keeping the correct date and time on your Raspberry Pi is crucial for various ap
 1. **Clone the Repository**
 
    ```bash
-   git clone https://github.com/yourusername/raspberry-pi-time-setup.git
+   git clone https://github.com/hpimentao/raspberry-pi-time-setup.git
    ```
 
 2. **Navigate to the Directory**
