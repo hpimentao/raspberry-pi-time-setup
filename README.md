@@ -1,80 +1,95 @@
 
-# Raspberry Pi Time Setup Script for Zurich Time Zone
+# Raspberry Pi Time Synchronization Script
 
-This repository provides a bash script to set up the date and time on a Raspberry Pi running Debian. The script sets the time zone to Zurich (Europe/Zurich) and ensures that the system time is automatically synchronized with internet time servers via NTP, eliminating the need for manual time entry.
+This project provides a simple and effective way to automatically synchronize the system time on a Raspberry Pi. It is particularly useful for scenarios where the Raspberry Pi might boot up with an incorrect date and time, such as after being powered off for an extended period.
 
-## Table of Contents
+## Features
 
-- [Introduction](#introduction)
-- [Prerequisites](#prerequisites)
-- [Installation](#installation)
-- [Usage](#usage)
-- [Script Details](#script-details)
-- [License](#license)
-
-## Introduction
-
-Keeping the correct date and time on your Raspberry Pi is crucial for various applications, especially those that rely on time-sensitive operations. This script automates the process of setting the time zone to Zurich and synchronizes the system time with internet time servers.
-
-## Prerequisites
-
-- Raspberry Pi running Debian-based OS.
-- Internet connection for time synchronization.
+- Automatically sets the system time using an HTTP-based time API.
+- Ensures accurate time synchronization by enabling NTP after the initial time setting.
+- Supports multiple methods for setting the system time, including fallback mechanisms.
+- Designed to work without a Real-Time Clock (RTC) module, making it ideal for use in environments where hardware constraints exist.
 
 ## Installation
 
-1. **Clone the Repository**
+1. **Clone the Repository:**
 
    ```bash
-   git clone https://github.com/hpimentao/raspberry-pi-time-setup.git
+   git clone https://github.com/hpimentao/raspberry-pi-time-sync.git
+   cd raspberry-pi-time-sync
    ```
 
-2. **Navigate to the Directory**
+2. **Make the Script Executable:**
 
    ```bash
-   cd raspberry-pi-time-setup
+   chmod +x time-sync.sh
    ```
 
-3. **Make the Script Executable**
+3. **Run the Script:**
 
    ```bash
-   chmod +x set_time_zurich.sh
+   sudo ./time-sync.sh
    ```
+
+4. **Automate the Script at Boot (Optional):**
+
+   To ensure the script runs automatically at boot, follow these steps:
+
+   - **Move the Script to `/usr/local/bin`:**
+
+     ```bash
+     sudo mv time-sync.sh /usr/local/bin/time-sync.sh
+     ```
+
+   - **Create a Systemd Service File:**
+
+     ```bash
+     sudo nano /etc/systemd/system/time-sync.service
+     ```
+
+     Add the following content:
+
+     ```ini
+     [Unit]
+     Description=Time Synchronization Script
+     After=network-online.target
+     Wants=network-online.target
+
+     [Service]
+     Type=oneshot
+     ExecStart=/usr/local/bin/time-sync.sh
+
+     [Install]
+     WantedBy=multi-user.target
+     ```
+
+   - **Enable and Start the Service:**
+
+     ```bash
+     sudo systemctl daemon-reload
+     sudo systemctl enable time-sync.service
+     sudo systemctl start time-sync.service
+     ```
+
+   - **Verify Service Status:**
+
+     ```bash
+     systemctl status time-sync.service
+     ```
 
 ## Usage
 
-Run the script with `sudo` to ensure it has the necessary permissions:
+- The script is designed to run automatically at boot if configured as a systemd service.
+- You can also run the script manually as needed to force a time update.
 
-```bash
-sudo ./set_time_zurich.sh
-```
+## Contributing
 
-## Script Details
-
-
-#### What the Script Does:
-
-- **Check Internet Connectivity:**
-
-  - Uses `ping` to verify that the Raspberry Pi is connected to the internet.
-  - If no connection is detected, the script exits with a message.
-
-- **Set Time Zone to Zurich:**
-
-  - Executes `timedatectl set-timezone Europe/Zurich` to set the system time zone.
-
-- **Enable NTP Synchronization:**
-
-  - Ensures NTP is enabled with `timedatectl set-ntp true` for automatic time synchronization.
-
-- **Synchronize Time:**
-
-  - Waits for 5 seconds to allow the system to synchronize time with internet servers.
-
-- **Display Current Time:**
-
-  - Displays the updated local time to confirm successful synchronization.
+Feel free to submit issues and pull requests if you find any bugs or have suggestions for improvements.
 
 ## License
 
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+This project is licensed under the MIT License. See the LICENSE file for more details.
+
+## Acknowledgments
+
+Special thanks to the maintainers of WorldTimeAPI and other reliable time services that make this project possible.
